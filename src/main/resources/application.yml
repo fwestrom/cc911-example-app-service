@@ -1,13 +1,19 @@
 name: cc911-example-app-service
+logging:
+    level:
+        root: WARN
+        com.msi.cc911: TRACE
 security:
     oauth2:
         client:
-            clientId: 1
-            clientSecret: 2
-            accessTokenUri: https://graph.facebook.com/oauth/access_token
-            userAuthorizationUri: https://www.facebook.com/dialog/oauth
-            tokenName: oauth_token
-            authenticationScheme: query
-            clientAuthenticationScheme: form
+            clientId: cc911-example-app-service
+            clientSecret: PBEJj783xwmGgvq3G1Ifiq3HfWRiemQ4GPhFXZZuVmIOGZu2ZQCTHFv1MwZke1pj
+#            clientId: cc911-example-app-ui
+#            clientSecret: eLzguSVLb0SoVJG4YqfDhQOYXfBrVEfwURdANTaHzOj5Ty4ESbHi07QtAm4eYMKG
+#            accessTokenUri: https://idmcc.imw.motorolasolutions.com/as/token.oauth2
+#            userAuthorizationUri: https://idmcc.imw.motorolasolutions.com/as/authorization.oauth2
+            accessTokenUri: https://idmmaster.imw.motorolasolutions.com/as/token.oauth2
+            userAuthorizationUri: https://idmmaster.imw.motorolasolutions.com/as/authorization.oauth2
+
         resource:
-            userInfoUri: https://graph.facebook.com/me
+            userInfoUri: https://idmmaster.imw.motorolasolutions.com/idp/userinfo.openid
