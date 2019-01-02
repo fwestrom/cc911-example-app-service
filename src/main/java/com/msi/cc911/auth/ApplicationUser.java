@@ -1,4 +1,4 @@
-package com.msi.cc911;
+package com.msi.cc911.auth;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

@@ -1,14 +1,14 @@
-package com.msi.cc911.config;
+package com.msi.cc911.example;
+
+import com.msi.cc911.auth.SecurityProperties;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.net.URL;
 
 @Configuration("appSecurityProperties")
-//@ConfigurationProperties(prefix = "security.oauth2")
-public class AppSecurityProperties {
+public class AppSecurityProperties implements SecurityProperties {
 
     @Value("${security.oauth2.client.accessTokenUri}")
     private URL accessTokenUri;

@@ -1,4 +1,4 @@
-package com.msi.cc911;
+package com.msi.cc911.spring;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

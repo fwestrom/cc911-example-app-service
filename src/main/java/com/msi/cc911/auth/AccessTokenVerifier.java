@@ -5,7 +5,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.msi.cc911.config.AppSecurityProperties;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -26,10 +26,10 @@ public class AccessTokenVerifier {
     private final Base64.Encoder base64Encoder = Base64.getEncoder();
     private final HttpRequestFactory httpRequestFactory = new NetHttpTransport().createRequestFactory();
     private final JsonFactory jsonFactory = new JacksonFactory();
-    private final AppSecurityProperties securityProperties;
+    private final SecurityProperties securityProperties;
 
-    public AccessTokenVerifier(AppSecurityProperties appSecurityProperties) {
-        this.securityProperties = appSecurityProperties;
+    public AccessTokenVerifier(SecurityProperties securityProperties) {
+        this.securityProperties = securityProperties;
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.msi.cc911.config;
+package com.msi.cc911.example;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;

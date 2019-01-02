@@ -1,4 +1,4 @@
-package com.msi.cc911;
+package com.msi.cc911.example;
 
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,13 +13,13 @@ public class GreetingController {
     }
 
     @RequestMapping("/greeting1")
-    @Secured("Call Taker")
+    @Secured("ROLE_Call Taker")
     public Greeting greeting1() {
         return new Greeting("Hello, call taker!");
     }
 
     @RequestMapping("/greeting2")
-    @Secured({ "Call Taker Supervisor" })
+    @Secured("ROLE_Call Taker Supervisor")
     public Greeting greeting2() {
         return new Greeting("Hello, supervisor!");
     }

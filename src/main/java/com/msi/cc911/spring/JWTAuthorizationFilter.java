@@ -1,4 +1,4 @@
-package com.msi.cc911;
+package com.msi.cc911.spring;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
@@ -22,9 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static com.msi.cc911.SecurityConstants.HEADER_STRING;
-import static com.msi.cc911.SecurityConstants.TOKEN_PREFIX;
-
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     private static final Logger log = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
     private final AccessTokenVerifier accessTokenVerifier;
@@ -38,8 +35,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
         log.warn("JWTAuthorizationFilter.doFilterInternal");
 
-        String header = req.getHeader(HEADER_STRING);
-        if (header == null || !header.startsWith(TOKEN_PREFIX)) {
+        String header = req.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
             chain.doFilter(req, res);
             return;
         }
@@ -49,7 +46,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-        String token = request.getHeader(HEADER_STRING);
+        String token = request.getHeader("Authorization");
         if (token != null && token.toLowerCase().startsWith("bearer")) {
             token = token.split(" ", 2)[1];
         }
@@ -65,15 +62,16 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         if (token != null) {
             DecodedJWT jwt = JWT.decode(token);
             try {
-                String claimsText = "";
+                StringBuilder claimsText = new StringBuilder();
                 for (Map.Entry<String, Claim> claim: jwt.getClaims().entrySet()) {
-                    claimsText += "\n    " + claim.getKey() + ": " + claim.getValue().asString();
+                    claimsText.append("\n    ").append(claim.getKey()).append(": ").append(claim.getValue().asString());
                 }
-                log.warn("jwt|\nheader: {}\npayload: {}\nsignature: {}\nalgorithm: {}\nsubject: {}\naudience: {}\nissuer: {}\nclaims: {}", jwt.getHeader(), jwt.getPayload(), jwt.getSignature(), jwt.getAlgorithm(), jwt.getSubject(), jwt.getAudience(), jwt.getIssuer(), claimsText);
+                log.trace("jwt|\nheader: {}\npayload: {}\nsignature: {}\nalgorithm: {}\nsubject: {}\naudience: {}\nissuer: {}\nclaims: {}", jwt.getHeader(), jwt.getPayload(), jwt.getSignature(), jwt.getAlgorithm(), jwt.getSubject(), jwt.getAudience(), jwt.getIssuer(),
+                  claimsText.toString());
 
                 ArrayList<GrantedAuthority> authorities = new ArrayList<>();
-                authorities.add(new SimpleGrantedAuthority("Call Taker"));
-                authorities.add(new SimpleGrantedAuthority("Call Taker Supervisor"));
+                authorities.add(new SimpleGrantedAuthority("ROLE_Call Taker"));
+                authorities.add(new SimpleGrantedAuthority("ROLE_Call Taker Supervisor"));
 
                 UsernamePasswordAuthenticationToken authtoken = new UsernamePasswordAuthenticationToken(jwt.getSubject(), jwt, authorities);
 //                authtoken.setDetails(new UserDetails() {

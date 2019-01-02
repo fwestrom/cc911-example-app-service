@@ -1,4 +1,6 @@
-package com.msi.cc911.config;
+package com.msi.cc911.example;
+
+import com.msi.cc911.example.AppSecurityProperties;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 

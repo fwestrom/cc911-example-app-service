@@ -1,7 +1,7 @@
 name: cc911-example-app-service
 logging:
     level:
-        root: WARN
+        root: DEBUG
         com.msi.cc911: TRACE
 security:
     oauth2:
