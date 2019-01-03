@@ -9,4 +9,6 @@ public interface SecurityProperties {
     String getClientId();
 
     String getClientSecret();
+
+    URL getUserInfoUri();
 }

@@ -54,6 +54,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
         try {
             accessTokenVerifier.verifyBearerToken(token);
+            accessTokenVerifier.enrichBearerToken(token);
         }
         catch (Exception ex) {
             log.warn("Error while verifying bearer token.", ex);

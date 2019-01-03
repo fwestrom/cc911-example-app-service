@@ -19,15 +19,26 @@ public class AppSecurityProperties implements SecurityProperties {
     @Value("${security.oauth2.client.clientSecret}")
     private String clientSecret;
 
+    @Value("${security.oauth2.commandcentral.userInfoUri}")
+    private URL userInfoUri;
+
+    @Override
     public URL getAccessTokenUri() {
         return accessTokenUri;
     }
 
+    @Override
     public String getClientId() {
         return clientId;
     }
 
+    @Override
     public String getClientSecret() {
         return clientSecret;
+    }
+
+    @Override
+    public URL getUserInfoUri() {
+        return userInfoUri;
     }
 }

@@ -17,3 +17,6 @@ security:
 
         resource:
             userInfoUri: https://idmmaster.imw.motorolasolutions.com/idp/userinfo.openid
+
+        commandcentral:
+            userInfoUri: https://api.master.commandcentral.com/api/admin/me
