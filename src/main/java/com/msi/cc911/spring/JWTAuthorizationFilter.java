@@ -5,6 +5,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.msi.cc911.auth.AccessTokenVerifier;
+import com.msi.cc911.auth.CC911AuthContext;
+import com.msi.cc911.auth.Permission;
+import com.msi.cc911.auth.TokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,77 +49,26 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+        TokenType tokenType = null;
         String token = request.getHeader("Authorization");
         if (token != null && token.toLowerCase().startsWith("bearer")) {
+            tokenType = TokenType.Bearer;
             token = token.split(" ", 2)[1];
         }
-        log.warn("JWTAuthorizationFilter.getAuthentication| token: {}", token);
 
         try {
-            accessTokenVerifier.verifyBearerToken(token);
-            accessTokenVerifier.enrichBearerToken(token);
+            CC911AuthContext authContext = accessTokenVerifier.verify(tokenType, token);
+
+            ArrayList<GrantedAuthority> authorities = new ArrayList<>();
+            for (Permission p: authContext.getPermissions()) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + p.getId()));
+            }
+
+            return new UsernamePasswordAuthenticationToken(authContext.getUserEmail(), authContext, authorities);
         }
         catch (Exception ex) {
             log.warn("Error while verifying bearer token.", ex);
+            return null;
         }
-
-        if (token != null) {
-            DecodedJWT jwt = JWT.decode(token);
-            try {
-                StringBuilder claimsText = new StringBuilder();
-                for (Map.Entry<String, Claim> claim: jwt.getClaims().entrySet()) {
-                    claimsText.append("\n    ").append(claim.getKey()).append(": ").append(claim.getValue().asString());
-                }
-                log.trace("jwt|\nheader: {}\npayload: {}\nsignature: {}\nalgorithm: {}\nsubject: {}\naudience: {}\nissuer: {}\nclaims: {}", jwt.getHeader(), jwt.getPayload(), jwt.getSignature(), jwt.getAlgorithm(), jwt.getSubject(), jwt.getAudience(), jwt.getIssuer(),
-                  claimsText.toString());
-
-                ArrayList<GrantedAuthority> authorities = new ArrayList<>();
-                authorities.add(new SimpleGrantedAuthority("ROLE_Call Taker"));
-                authorities.add(new SimpleGrantedAuthority("ROLE_Call Taker Supervisor"));
-
-                UsernamePasswordAuthenticationToken authtoken = new UsernamePasswordAuthenticationToken(jwt.getSubject(), jwt, authorities);
-//                authtoken.setDetails(new UserDetails() {
-//                    @Override
-//                    public Collection<? extends GrantedAuthority> getAuthorities() {
-//                        return authorities;
-//                    }
-//
-//                    @Override
-//                    public String getPassword() {
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    public String getUsername() {
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    public boolean isAccountNonExpired() {
-//                        return false;
-//                    }
-//
-//                    @Override
-//                    public boolean isAccountNonLocked() {
-//                        return false;
-//                    }
-//
-//                    @Override
-//                    public boolean isCredentialsNonExpired() {
-//                        return false;
-//                    }
-//
-//                    @Override
-//                    public boolean isEnabled() {
-//                        return true;
-//                    }
-//                });
-                return authtoken;
-            }
-            catch (JWTVerificationException ex) {
-                log.warn("Exception while parsing auth token:", ex);
-            }
-        }
-        return null;
     }
 }

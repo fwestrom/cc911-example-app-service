@@ -13,13 +13,13 @@ public class GreetingController {
     }
 
     @RequestMapping("/greeting1")
-    @Secured("ROLE_Call Taker")
+    @Secured("ROLE_call-taker")
     public Greeting greeting1() {
         return new Greeting("Hello, call taker!");
     }
 
     @RequestMapping("/greeting2")
-    @Secured("ROLE_Call Taker Supervisor")
+    @Secured("ROLE_supervisor")
     public Greeting greeting2() {
         return new Greeting("Hello, supervisor!");
     }

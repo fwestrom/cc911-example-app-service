@@ -1,8 +1,7 @@
 package com.msi.cc911.auth;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
@@ -11,18 +10,13 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
-import com.msi.cc911.auth.me.UserInfo;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.springframework.security.access.AccessDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Base64;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * CC911 Access Token Verifier
@@ -40,11 +34,22 @@ public class AccessTokenVerifier {
     }
 
     /**
-     * Verifies a bearer token.
-     * @param token The access token
+     * Verifies an auth token and returns an auth context.
+     * @param tokenType The token type.
+     * @param token The access token.
+     * @return An auth context for the verified token.
      */
+    public CC911AuthContext verify(TokenType tokenType, String token) {
+        if (tokenType != TokenType.Bearer) {
+            throw new UnsupportedOperationException("Only bearer tokens are supported.");
+        }
+
+        verifyBearerToken(token);
+        return enrichBearerToken(token);
+    }
+
     // TODO: Decide whether to return something more interesting than void here (probably should!)
-    public void verifyBearerToken(String token) throws AccessDeniedException {
+    private void verifyBearerToken(String token) throws AccessDeniedException {
         URL accessTokenUri = securityProperties.getAccessTokenUri();
         log.trace("verifyBearerToken| accessTokenUri: {}", accessTokenUri);
 
@@ -84,7 +89,7 @@ public class AccessTokenVerifier {
         }
     }
 
-    public void enrichBearerToken(String token) {
+    private CC911AuthContext enrichBearerToken(String token) {
         URL userInfoUri = securityProperties.getUserInfoUri();
         log.trace("verifyBearerToken| accessTokenUri: {}", userInfoUri);
 
@@ -98,17 +103,30 @@ public class AccessTokenVerifier {
 
             try {
                 HttpResponse response = request.execute();
+
                 ObjectMapper objectMapper = new ObjectMapper(new MappingJsonFactory());
                 objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                UserInfo userInfo = objectMapper.readValue(response.parseAsString(), UserInfo.class);
-                log.trace("enrichBearerToken|\n userInfo: " + objectMapper.writeValueAsString(userInfo) + "\n " + objectMapper.writeValueAsString(userInfo.getServices().getCc911()));
+
+                JsonNode root = objectMapper.readTree(response.parseAsString());
+                JsonNode cc911 = root.get("services").get("cc911");
+
+                List<Permission> permissions = new ArrayList<Permission>();
+                for (Iterator<JsonNode> it = cc911.get("permissions").elements(); it.hasNext(); ) {
+                    JsonNode jp = it.next();
+                    log.trace("enrichBearerToken| permission:\n" + jp);
+                    permissions.add(new Permission(jp.get("systemName").asText(), jp.get("name").asText()));
+                }
+
+                CC911AuthContext authContext = new CC911AuthContext(
+                        root.get("id").asText(),
+                        root.get("email").asText(),
+                        permissions);
+                return authContext;
             }
             catch (HttpResponseException ex) {
-                if (ex.getStatusCode() == 400) {
-                    GenericJson json = jsonFactory.fromString(ex.getContent(), GenericJson.class);
-                    log.trace("enrichBearerToken| response error:\n" + json.toPrettyString());
-                    throw new AccessDeniedException("Enrich token error: " + json.get("error") + " (" + json.get("error_description") + ")");
-                }
+                GenericJson json = jsonFactory.fromString(ex.getContent(), GenericJson.class);
+                log.trace("enrichBearerToken| response error:\n" + json.toPrettyString());
+                throw new AccessDeniedException("Enrich token error: " + json.get("error") + " (" + json.get("error_description") + ")");
             }
         }
         catch (IOException ex) {
@@ -116,3 +134,5 @@ public class AccessTokenVerifier {
         }
     }
 }
+
+
