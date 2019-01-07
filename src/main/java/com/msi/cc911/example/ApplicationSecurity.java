@@ -1,7 +1,5 @@
 package com.msi.cc911.example;
 
-import com.msi.cc911.spring.JWTAuthenticationFilter;
-import com.msi.cc911.spring.JWTAuthorizationFilter;
 import com.msi.cc911.auth.AccessTokenVerifier;
 
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
@@ -34,7 +32,6 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
                 .permitAll()
             .anyRequest()
                 .authenticated().and()
-                    .addFilter(new JWTAuthenticationFilter(authenticationManager()))
                     .addFilter(new JWTAuthorizationFilter(accessTokenVerifier, authenticationManager()));
     }
 

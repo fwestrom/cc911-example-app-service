@@ -1,9 +1,5 @@
-package com.msi.cc911.spring;
+package com.msi.cc911.example;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.msi.cc911.auth.AccessTokenVerifier;
 import com.msi.cc911.auth.CC911AuthContext;
 import com.msi.cc911.auth.Permission;
@@ -23,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     private static final Logger log = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
